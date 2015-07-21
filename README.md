@@ -6,7 +6,7 @@
 ###Installation
 
 ```bash
-git clone https://github.com/Famous/engine-seed
+git clone https://github.com/borisvasilenko/famous-seed-typescript
 cd engine-seed
 # rm -rf .git && git init && git commit -m "Make it so" # optionally reset git history
 npm i # install dependencies
