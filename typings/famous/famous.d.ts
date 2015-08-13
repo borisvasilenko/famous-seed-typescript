@@ -1,8 +1,14 @@
+// Type definitions for Famous Engine v0.7.1
+// Project: http://famous.org/
+// Definitions by: Boris Vasilenko <https://github.com/borisvasilenko/>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
 declare module "famous/core" {
 	export class FamousEngine {
 		static init(): FamousEngine;
 		static createScene(): Scene;
 		static getClock(): Clock;
+		static getContext(selector: string): Scene;
 		
 		createScene(): Scene;
 		
@@ -14,6 +20,11 @@ declare module "famous/core" {
 	}
 	
 	export class Node {
+		static RELATIVE_SIZE: number;
+		static ABSOLUTE_SIZE: number;
+		static RENDER_SIZE: number;
+		static DEFAULT_SIZE: number;
+		
 		addComponent(component: any): number;
 		getComponent(index: number): any;
 		getComponents(): any[];
@@ -21,6 +32,7 @@ declare module "famous/core" {
 		addChild(node?: Node): Node;
 		getChildren(): Node[];
 		removeChild(node: Node): boolean;
+		getParent(): Node;
 		
 		isMounted(): boolean;
 		mount(): void;
@@ -58,13 +70,16 @@ declare module "famous/core" {
 		isMounted(): boolean;
 		isShown(): boolean;
 		
+		getMountPoint(): number[];
 		setMountPoint(x?: number, y?: number, z?: number): Node;
+		
+		getAlign(): number[];
 		setAlign(x?: number, y?: number, z?: number): Node;
 		
 		setScale(x?: number, y?: number, z?: number): Node;
 		
 		setOrigin(x?: number, y?: number, z?: number): Node;
-		setRotation(x?: number, y?: number, z?: number): Node;
+		setRotation(x?: number, y?: number, z?: number, w?: number): Node;
 		
 		addUIEvent(eventName: string): void;
 		getLocation(): string;
@@ -83,6 +98,14 @@ declare module "famous/core" {
 	
 	export class Dispatch {
 		static dispatchUIEvent(path: string, event: string, payload: any): void;
+	}
+	
+	export class TransformSystem {
+		static deregisterTransformAtPath(path: string): void;
+	}
+	
+	export class SizeSystem {
+		static deregisterSizeAtPath(path: string): void;
 	}
 }
 
@@ -288,6 +311,8 @@ declare module "famous/dom-renderers/events" {
 	}
 	export class MouseEvent {
 	}
+	export class TouchEvent {
+	}
 }
 
 declare module "famous/math" {
@@ -319,11 +344,16 @@ declare module "famous/math" {
 	}
 	
 	export class Mat33 {
-		
+		values: number[];
 	}
 	
 	export class Quaternion {
-		
+		w: number;
+		x: number;
+		y: number;
+		z: number;
+		toEuler(output: Vec3): Vec3;
+		fromEuler(x: number, y: number, z: number): Quaternion;
 	}
 	
 	export class Vec3 {
@@ -364,7 +394,11 @@ declare module "famous/math" {
 }
 
 declare module "famous/physics" {
-	import * as math from "famous/math"
+	import {
+		Vec3, 
+		Mat33,
+		Quaternion 
+	} from 'famous/math'
 	
 	export class PhysicsEngine {
 		on(key: string, callback: (payload: any) => void): void;
@@ -394,21 +428,21 @@ declare module "famous/physics" {
 	
 	export class Particle {
 		constructor(options?: IParticleOptions);
-		position: math.Vec3;
-		orientation: math.Quaternion;
-		velocity: math.Vec3;
-		momentum: math.Vec3;
-		angularVelocity: math.Vec3;
-		angularMomentum: math.Vec3;
+		position: Vec3;
+		orientation: Quaternion;
+		velocity: Vec3;
+		momentum: Vec3;
+		angularVelocity: Vec3;
+		angularMomentum: Vec3;
 		mass: number;
 		inverseMass: number;
-		force: math.Vec3;
-		torque: math.Vec3;
+		force: Vec3;
+		torque: Vec3;
 		restitution: number;
 		friction: number;
-		inverseInertia: math.Mat33;
-		localInertia: math.Mat33;
-		localInveseInertia: math.Mat33;
+		inverseInertia: Mat33;
+		localInertia: Mat33;
+		localInveseInertia: Mat33;
 		size: number[];
 		restrictions: number;
 		collisionMask: number;
@@ -424,33 +458,33 @@ declare module "famous/physics" {
 		getInverseMass(): number;
 		updateLocalInertia(): Particle;
 		updateInertia(): Particle;
-		getPosition(): math.Vec3;
+		getPosition(): Vec3;
 		setPosition(x: number, y: number, z: number): Particle;
-		getVelocity(): math.Vec3;
+		getVelocity(): Vec3;
 		setVelocity(x: number, y: number, z: number): Particle;
-		getMomentum(): math.Vec3;
+		getMomentum(): Vec3;
 		setMomentum(x: number, y: number, z: number): Particle;
-		getOrientation(): math.Quaternion;
+		getOrientation(): Quaternion;
 		setOrientation(w: number, x: number, y: number, z: number): Particle;
-		getAngularVelocity(): math.Vec3;
+		getAngularVelocity(): Vec3;
 		setAngularVelocity(x: number, y: number, z: number): Particle;
-		getAngularMomentum(): math.Vec3;
+		getAngularMomentum(): Vec3;
 		setAngularMomentum(x: number, y: number, z: number): Particle;
-		getForce(): number;
+		getForce(): Vec3;
 		setForce(x: number, y: number, z: number): Particle;
-		getTorque(): number;
+		getTorque(): Vec3;
 		setTorque(x: number, y: number, z: number): Particle;
-		applyForce(force: any): Particle;
-		applyTorque(torque: any): Particle;
-		applyImpulse(impulse: any): Particle;
-		applyAngularImpulse(angularImpulse: any): Particle;
-		support(): math.Vec3;
+		applyForce(force: Vec3): Particle;
+		applyTorque(torque: Vec3): Particle;
+		applyImpulse(impulse: Vec3): Particle;
+		applyAngularImpulse(angularImpulse: Vec3): Particle;
+		support(): Vec3;
 		updateShape(): void;
 	}
 	
 	export interface IParticleOptions {
-		position?: math.Vec3;
-		orientation?: math.Quaternion;
+		position?: Vec3;
+		orientation?: Quaternion;
 		mass?: number;
 		restitution?: number;
 		friction?: number;
@@ -463,8 +497,8 @@ declare module "famous/physics" {
 	
 	export class Wall extends Particle {
 		constructor(options: IWallOptions);
-		normal: math.Vec3;
-		invNormal: math.Vec3;
+		normal: Vec3;
+		invNormal: Vec3;
 		
 	}
 	
@@ -483,7 +517,7 @@ declare module "famous/physics" {
 		addTarget(target: any): void;
 		removeTarget(target: any): void;
 		init(options: any): void;
-		update(time: number, dt: number): void;
+		update(time?: number, dt?: number): void;
 	}
 	
 	export interface IDragOptions extends IForceOptions {
@@ -511,7 +545,7 @@ declare module "famous/physics" {
 		damping?: number;
 		period?: number;
 		dampingRatio?: number;
-		anchor?: math.Vec3;
+		anchor?: Vec3;
 	}
 	
 	export class Spring extends Force {
@@ -524,10 +558,44 @@ declare module "famous/physics" {
 		damping: number;
 		period: number;
 		dampingRatio: number;
-		anchor: math.Vec3;
-		constructor(source?: any, targets?: any[]|any, options?: ISpringOptions);
+		anchor: Vec3;
+		constructor(source?: Particle, targets?: Particle[]|Particle, options?: ISpringOptions);
 		init(options?: ISpringOptions): void;
 		update(): void;
+	}
+	
+	export interface IRotationalSpringOptions extends IForceOptions {
+		max?: number;
+		type?: (dist: any, rMax: any) => number;
+		stiffness?: number;
+		damping?: number;
+		period?: number;
+		dampingRatio?: number;
+		anchor?: Quaternion;
+	}
+	
+	export class RotationalSpring extends Force {
+		constructor(source?: Particle, targets?: Particle[]|Particle, options?: IRotationalSpringOptions);
+		max: number;
+		stiffness: number;
+		damping: number;
+		period: number;
+		dampingRatio: number;
+		anchor: Vec3;
+	}
+	
+	export class ConvexBody extends Particle {
+	}
+	
+	export class Box extends ConvexBody {
+		constructor(options?: any);
+	}
+	
+	export class Constraint {
+	}
+	
+	export class Angle extends Constraint {
+		constructor(a: Particle, b: Particle, options?: any);
 	}
 }
 
@@ -567,5 +635,12 @@ declare module "famous/transitions" {
 		static outBounce: (t: number) => number;
 		static inOutBounce: (t: number) => number;
 		static flat: (t: number) => number;
+	}
+}
+
+declare module "famous/utilities" {
+	export class CallbackStore {
+		on(event: string, callback: (payload: any) => void): void;
+		trigger(event: string, payload: any): void;
 	}
 }
